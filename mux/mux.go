@@ -17,6 +17,7 @@ import (
 
 	"mellium.im/xmlstream"
 	"mellium.im/xmpp"
+	"mellium.im/xmpp/disco"
 	"mellium.im/xmpp/internal/ns"
 	"mellium.im/xmpp/stanza"
 )
@@ -52,6 +53,7 @@ type ServeMux struct {
 	iqPatterns       map[pattern]IQHandler
 	msgPatterns      map[pattern]MessageHandler
 	presencePatterns map[pattern]PresenceHandler
+	registry         *disco.Registry
 }
 
 // New allocates and returns a new ServeMux.
@@ -207,6 +209,13 @@ func (m *ServeMux) PresenceHandler(typ stanza.PresenceType, payload xml.Name) (h
 func (m *ServeMux) HandleXMPP(t xmlstream.TokenReadEncoder, start *xml.StartElement) error {
 	h, _ := m.Handler(start.Name)
 	return h.HandleXMPP(t, start)
+}
+
+// DiscoRegistry returns a service discovery registry containing every feature
+// and item from handlers registered on the mux that also supports the
+// DiscoHandler interface.
+func (m *ServeMux) DiscoRegistry() *disco.Registry {
+	return m.registry
 }
 
 type nopHandler struct{}

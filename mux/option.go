@@ -8,12 +8,30 @@ import (
 	"encoding/xml"
 
 	"mellium.im/xmpp"
+	"mellium.im/xmpp/disco"
 	"mellium.im/xmpp/internal/ns"
 	"mellium.im/xmpp/stanza"
 )
 
+// DiscoHandler is the type implemented by handlers that can be registered in a
+// service discovery registry.
+type DiscoHandler interface {
+	Disco(*disco.Registry)
+}
+
 // Option configures a ServeMux.
 type Option func(m *ServeMux)
+
+// Disco adds the provided options to the built in service discovery registry
+// and then responds to disco info requests using the registry.
+func Disco(opts ...disco.Option) Option {
+	return func(m *ServeMux) {
+		for _, opt := range opts {
+			opt(m.registry)
+		}
+		IQ(stanza.GetIQ, xml.Name{Local: "query", Space: disco.NSInfo}, m.registry)(m)
+	}
+}
 
 // IQ returns an option that matches IQ stanzas based on their type and the name
 // of the payload.
@@ -30,6 +48,13 @@ func IQ(typ stanza.IQType, payload xml.Name, h IQHandler) Option {
 			m.iqPatterns = make(map[pattern]IQHandler)
 		}
 		m.iqPatterns[pat] = h
+
+		if d, ok := h.(DiscoHandler); ok {
+			if m.registry == nil {
+				m.registry = disco.NewRegistry()
+			}
+			d.Disco(m.registry)
+		}
 	}
 }
 
@@ -53,6 +78,13 @@ func Message(typ stanza.MessageType, payload xml.Name, h MessageHandler) Option 
 			m.msgPatterns = make(map[pattern]MessageHandler)
 		}
 		m.msgPatterns[pat] = h
+
+		if d, ok := h.(DiscoHandler); ok {
+			if m.registry == nil {
+				m.registry = disco.NewRegistry()
+			}
+			d.Disco(m.registry)
+		}
 	}
 }
 
@@ -76,6 +108,13 @@ func Presence(typ stanza.PresenceType, payload xml.Name, h PresenceHandler) Opti
 			m.presencePatterns = make(map[pattern]PresenceHandler)
 		}
 		m.presencePatterns[pat] = h
+
+		if d, ok := h.(DiscoHandler); ok {
+			if m.registry == nil {
+				m.registry = disco.NewRegistry()
+			}
+			d.Disco(m.registry)
+		}
 	}
 }
 
