@@ -11,6 +11,7 @@ import (
 
 	"mellium.im/xmlstream"
 	"mellium.im/xmpp"
+	"mellium.im/xmpp/disco"
 	"mellium.im/xmpp/jid"
 	"mellium.im/xmpp/mux"
 	"mellium.im/xmpp/stanza"
@@ -24,8 +25,19 @@ func Handle() mux.Option {
 	return mux.IQ(stanza.GetIQ, xml.Name{Local: "ping", Space: NS}, Handler{})
 }
 
+// Disco returns an option that registers ping support with a service discovery
+// registry.
+func Disco() disco.Option {
+	return disco.Feature(NS)
+}
+
 // Handler responds to ping requests.
 type Handler struct{}
+
+// Disco is a disco.Option that registers ping support.
+func (h Handler) Disco(r *disco.Registry) {
+	Disco()(r)
+}
 
 // HandleIQ implements mux.IQHandler.
 func (h Handler) HandleIQ(iq stanza.IQ, t xmlstream.TokenReadEncoder, start *xml.StartElement) error {
