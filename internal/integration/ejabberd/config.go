@@ -16,6 +16,7 @@ type Config struct {
 	S2SSocket  string
 	CompSocket string
 	Component  map[string]string
+	Zlib       bool
 }
 
 const inetrc = `{lookup,["file","native"]}.
@@ -46,7 +47,8 @@ listen:
     max_stanza_size: 262144
     shaper: c2s_shaper
     access: c2s
-    starttls_required: true
+		{{ if not .Zlib}}starttls_required: true{{ end }}
+		{{ if .Zlib }}zlib: true{{ end }}
 {{- end }}
 {{- if .S2SSocket }}
   -
@@ -54,6 +56,7 @@ listen:
     ip: "::1"
     module: ejabberd_s2s_in
     max_stanza_size: 524288
+		{{ if .Zlib }}zlib: true{{ end }}
 {{- end }}
 {{- if .CompSocket }}
   -
