@@ -7,6 +7,7 @@ package prosody // import "mellium.im/xmpp/internal/integration/prosody"
 
 import (
 	"context"
+	_ "embed"
 	"io"
 	"net"
 	"os/exec"
@@ -15,6 +16,11 @@ import (
 
 	"mellium.im/xmpp/internal/integration"
 	"mellium.im/xmpp/jid"
+)
+
+var (
+	//go:embed mod_compression_unsafe.lua
+	prosodyModCompress string
 )
 
 const (
@@ -230,6 +236,21 @@ func Set(key string, v interface{}) integration.Option {
 		cfg.Options[key] = v
 		cmd.Config = cfg
 		return nil
+	}
+}
+
+// StreamCompression enables mod_compress_unsafe for zlib stream compression.
+func StreamCompression() integration.Option {
+	const modName = "compression_unsafe"
+	return func(cmd *integration.Cmd) error {
+		err := Modules(modName)(cmd)
+		if err != nil {
+			return err
+		}
+		return integration.TempFile("mod_"+modName+".lua", func(_ *integration.Cmd, w io.Writer) error {
+			_, err := io.WriteString(w, prosodyModCompress)
+			return err
+		})(cmd)
 	}
 }
 
