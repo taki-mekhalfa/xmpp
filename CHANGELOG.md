@@ -12,11 +12,14 @@ All notable changes to this project will be documented in this file.
 
 ### Added:
 
+- bookmarks: new package implementing [XEP-0402: PEP Native Bookmarks]
 - pubsub: new package implementing parts of [XEP-0060: Publish-Subscribe] and
   [XEP-0163: Personal Eventing Protocol]
 
+
 [XEP-0060: Publish-Subscribe]: https://xmpp.org/extensions/xep-0060.html
 [XEP-0163: Personal Eventing Protocol]: https://xmpp.org/extensions/xep-0163.html
+[XEP-0402: PEP Native Bookmarks]: https://xmpp.org/extensions/xep-0402.html
 
 
 ## v0.20.0 — 2021-09-26
