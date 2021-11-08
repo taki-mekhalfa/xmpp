@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 - xmpp: the deprecated methods `InSID` and `OutSID` have been dropped in favor
   of `In` and `Out`
+- styling: individual tokens no longer contains their own Style, use Decoder's
+  `Style()` method instead
 
 
 ### Added:
